@@ -1,0 +1,57 @@
+# [注意]
+# 下記の # で始まるコメント行を変更（修正，削除）しないこと．
+# 課題Nの回答は，### ExerciseN ### のコメント行の下の領域に記述して下さい．
+
+### ID ### 学籍番号を「NN_NNNNN」のように書いて下さい
+
+
+### Email ### mメールアドレスを書いて下さい
+
+
+### Name ### 氏名を「東工 太郎」のように書いて下さい
+
+
+### Env ### 演習実施環境（OSとその上でのUNIX環境）を明らかにして下さい
+### 例：repl.it
+### 例：WSL1 on Windows 10
+### 例：WSL2 on Windows 10
+### 例：macOS 10.15 on Intel Mac
+### 例：macOS 10.16 on M1 Mac
+### 例：Ubuntu Linux 20.04
+
+
+### Exercise1 ### 課題1
+# telnet による適当な接続結果をペーストしましょう．
+
+
+
+### Exercise1-test ###
+### make test1 の結果を貼り付けて下さい．
+
+
+
+### Exercise2 ### 課題2
+# 実装方法について，概要を簡単にまとめてください．
+
+
+
+### Exercise2-test ###
+### make test2 の結果を貼り付けて下さい．
+
+
+
+### ExerciseA ### 発展課題A
+# telnet による適当な接続結果をペーストしましょう．
+
+
+
+### ExerciseA-test ###
+### make testA の結果を貼り付けて下さい．
+
+
+
+### Comment ### 感想（採点対象外，好きに書いて下さい．）
+
+
+
+### END ###
