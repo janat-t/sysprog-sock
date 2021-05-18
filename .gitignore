@@ -1,6 +1,8 @@
-main
-fd
 .DS_Store
 *tmp*
 *.zip
 
+main
+sleep-1sec
+ttcurl
+docroot/bin.cgi

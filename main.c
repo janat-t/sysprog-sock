@@ -12,6 +12,8 @@
 #include <unistd.h>
 
 int port = 10000;
+char docroot[] = "./docroot";
+char defaultpath[] = "/index.html";
 
 /** Checks whether a file exists and it is a normal file. */
 int exists_file(char *fname) {
@@ -86,7 +88,7 @@ void send_status_body(FILE *fout, char *status, char *body) {
 }
 void send_404(FILE *fout) {
     send_status_body(fout, "404 Not Found",
-                     "<title>404 Not Found</title><h1>404 Not Found</h1>\n");
+            "<title>404 Not Found</title><h1>404 Not Found</h1>\n");
 }
 
 
@@ -110,14 +112,25 @@ void session(int fd, FILE *fout, FILE *fin, char *caddr, int cport) {
         LOG("[Header] %s", chomp(line));
     }
 
+    char path[2048];
+    if (strcmp(uri, "/") == 0) strcpy(uri, defaultpath);
+    sprintf(path, "%s%s", docroot, uri);
+    LOG("file path = '%s'", path);
+    if (!exists_file(path)) {
+        send_404(fout);
+        return;
+    }
+
     // default behavior; you can rewrite these lines
+    FILE *fl = fopen(path, "r");
     fprintf(fout, "HTTP/1.0 200 OK\r\n");
-    fprintf(fout, "Content-Type: text/html\r\n");
+    fprintf(fout, "Content-Type: %s\r\n", get_content_type(get_extension(uri)));
     fprintf(fout, "\r\n");
-    fprintf(fout, "<title>httpd</title>\r\n");
-    fprintf(fout, "<p>Client: %s:%d</p>\r\n", caddr, cport);
-    fprintf(fout, "<p>Request line: <samp>%s %s %s</samp></p>\r\n", method, uri, version);
-    fprintf(fout, "\r\n");
+    send_stream(fout, fl);
+    // fprintf(fout, "<title>httpd</title>\r\n");
+    // fprintf(fout, "<p>Client: %s:%d</p>\r\n", caddr, cport);
+    // fprintf(fout, "<p>Request line: <samp>%s %s %s</samp></p>\r\n", method, uri, version);
+    // fprintf(fout, "\r\n");
 }
 
 void do_session(int fd, char *caddr, int cport) {
@@ -155,10 +168,15 @@ void serve() {
         struct sockaddr_in caddr;
         unsigned int addrlen = sizeof(caddr);
         int connfd = accept(listfd, (struct sockaddr *)&caddr, &addrlen);
-        if (connfd == -1)
-            PERROR_DIE("accept");
+        if (fork() == 0) { // Child process
+            if (connfd == -1)
+                PERROR_DIE("accept");
 
-        do_session(connfd, inet_ntoa(caddr.sin_addr), ntohs(caddr.sin_port));
+            do_session(connfd, inet_ntoa(caddr.sin_addr), ntohs(caddr.sin_port));
+            exit(0);
+        } else { // Parent process
+            close(connfd);
+        }
     }
 }
 
@@ -166,18 +184,18 @@ void parse_options(int argc, char **argv) {
     int opt;
     while ((opt = getopt(argc, argv, "qp:")) != -1) {
         switch (opt) {
-        case 'q': /* -q: quiet */
-            l_set_quiet(1);
-            break;
-        case 'p': /* -p N: port number */
-            port = atoi(optarg);
-            if (port <= 0)
-                DIE("Invalid port number");
-            break;
-        case '?':
-        default:
-            fprintf(stderr, "Usage: %s [-q] [-p port]\n", argv[0]);
-            exit(EXIT_FAILURE);
+            case 'q': /* -q: quiet */
+                l_set_quiet(1);
+                break;
+            case 'p': /* -p N: port number */
+                port = atoi(optarg);
+                if (port <= 0)
+                    DIE("Invalid port number");
+                break;
+            case '?':
+            default:
+                fprintf(stderr, "Usage: %s [-q] [-p port]\n", argv[0]);
+                exit(EXIT_FAILURE);
         }
     }
 }
