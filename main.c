@@ -120,11 +120,21 @@ void session(int fd, FILE *fout, FILE *fin, char *caddr, int cport) {
         send_404(fout);
         return;
     }
+    char *ext = get_extension(uri);
+
+    if (strcmp(ext, "cgi") == 0) {
+        dup2(fd, STDOUT_FILENO);
+        close(fd);
+        write(STDOUT_FILENO, "HTTP/1.0 200 OK\r\n", 17);
+        system(path);
+        close(STDOUT_FILENO);
+        return;
+    }
 
     // default behavior; you can rewrite these lines
     FILE *fl = fopen(path, "r");
     fprintf(fout, "HTTP/1.0 200 OK\r\n");
-    fprintf(fout, "Content-Type: %s\r\n", get_content_type(get_extension(uri)));
+    fprintf(fout, "Content-Type: %s\r\n", get_content_type(ext));
     fprintf(fout, "\r\n");
     send_stream(fout, fl);
     // fprintf(fout, "<title>httpd</title>\r\n");
